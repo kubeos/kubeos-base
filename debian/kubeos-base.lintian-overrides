@@ -1,0 +1,6 @@
+# /etc files in this package are replaced on upgrade on purpose (KubeOS decision D5, recorded in
+# PACKAGING-DECISIONS.md: exactly one conffile in the whole distribution, /etc/kubeos/kubeos.conf).
+# The archive keyring and the sources line must follow the distribution: keeping them as conffiles
+# would leave a node trusting a retired key, or an old repository line, after an upgrade - and an
+# unattended `apt upgrade` cannot answer a conffile prompt at all.
+kubeos-base: file-in-etc-not-marked-as-conffile
