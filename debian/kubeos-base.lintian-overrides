@@ -4,3 +4,8 @@
 # would leave a node trusting a retired key, or an old repository line, after an upgrade - and an
 # unattended `apt upgrade` cannot answer a conffile prompt at all.
 kubeos-base: file-in-etc-not-marked-as-conffile
+
+# /etc/apt/sources.list.d/kubeos.list is the point of this package: a KubeOS node updates itself
+# from repo.kubeos.in and nothing else. Debian's tag assumes a distribution repository set up by
+# the installer; KubeOS ships its own archive line so that `apt upgrade` works on a fresh install.
+kubeos-base: package-installs-apt-sources

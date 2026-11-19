@@ -1,3 +1,9 @@
+kubeos-base (0.2.0-3) trixie; urgency=medium
+
+  * More lintian overrides, each with its reason: package-installs-apt-sources (the archive line is the point of this package).
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 02:15:00 +0530
+
 kubeos-base (0.2.0-2) trixie; urgency=medium
 
   * Add debian/kubeos-base.lintian-overrides for file-in-etc-not-marked-as-conffile: the files
