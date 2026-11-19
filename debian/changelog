@@ -1,3 +1,13 @@
+kubeos-base (0.1.0-1kubeos2) trixie; urgency=medium
+
+  * Depend on kubeos-kubernetes. Without it, "apt install kubeos-base" - the documented
+    way to turn a Debian system into a KubeOS node - installed nine of the ten components
+    and left kubelet/kubeadm/kubectl/kubernetes-cni unpinned, which is exactly what the
+    pin exists to prevent. The ISO was unaffected because it lists kubeos-kubernetes
+    itself, but the metapackage has to be complete on its own.
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 00:55:00 +0530
+
 kubeos-base (0.1.0-1kubeos1) trixie; urgency=medium
 
   * Initial packaging: the metapackage that names this distribution version and pulls
