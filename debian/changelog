@@ -1,3 +1,11 @@
+kubeos-base (0.2.0-1) trixie; urgency=medium
+
+  * Debian revision numbering: 0.1.0-1kubeos2 -> 0.2.0-1. The revision is a plain Debian one now
+    instead of the 1kubeosN prefix the first uploads used; the upstream version is
+    unchanged. The KubeOS distribution version lives in kubeos-base, which is 0.2.0.
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 01:00:00 +0530
+
 kubeos-base (0.1.0-1kubeos2) trixie; urgency=medium
 
   * Depend on kubeos-kubernetes. Without it, "apt install kubeos-base" - the documented
