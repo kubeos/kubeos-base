@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+# The sources line and the keyring are KubeOS's own; they must be replaced on upgrade
+# rather than kept as a conffile (D5: only /etc/kubeos/kubeos.conf is a conffile).
+override_dh_installdeb:
+	dh_installdeb
+	: > debian/kubeos-base/DEBIAN/conffiles

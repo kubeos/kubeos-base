@@ -1,0 +1,1 @@
+deb [signed-by=/etc/apt/keyrings/kubeos-archive-keyring.asc] https://repo.kubeos.in trixie main

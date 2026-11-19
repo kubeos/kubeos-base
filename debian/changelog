@@ -1,0 +1,7 @@
+kubeos-base (0.1.0-1kubeos1) trixie; urgency=medium
+
+  * Initial packaging: the metapackage that names this distribution version and pulls
+    every KubeOS component, plus the archive keyring and sources line that let a node
+    update itself with apt instead of needing a new ISO.
+
+ -- KubeOS <mail@kubeos.in>  Thu, 19 Nov 2026 10:20:00 +0530

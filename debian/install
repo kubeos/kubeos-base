@@ -1,0 +1,2 @@
+payload/etc/apt/keyrings/kubeos-archive-keyring.asc   etc/apt/keyrings/
+payload/etc/apt/sources.list.d/kubeos.list            etc/apt/sources.list.d/

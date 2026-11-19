@@ -1,0 +1,23 @@
+Source: kubeos-base
+Section: admin
+Priority: optional
+Maintainer: KubeOS <mail@kubeos.in>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://kubeos.in/
+
+Package: kubeos-base
+Architecture: all
+Depends: ${misc:Depends}, kubeos-branding, kubeos-cli, kubeos-pause-image, kubeos-metrics-server, kubeos-network, kubeos-storage, kubeos-control-plane, kubeos-dashboard
+Description: KubeOS: the container platform on top of Debian
+ Installs a complete KubeOS node and, through its version, answers the question a Debian
+ system cannot answer on its own: which KubeOS is this? The individual components carry
+ their own upstream versions and can be upgraded one at a time; this package is the thread
+ that ties them together, and it is what "apt upgrade" moves when the distribution itself
+ moves.
+ .
+ It also enables the archive: the KubeOS signing key in
+ /etc/apt/keyrings/kubeos-archive-keyring.asc and the repository line in
+ /etc/apt/sources.list.d/kubeos.list, so a node can update itself without being
+ re-installed from a new ISO.
