@@ -1,3 +1,130 @@
+kubeos-base (0.2.0-14) trixie; urgency=medium
+
+  * Depend on kubeos-firewall, so every KubeOS node gets the INPUT default-deny firewall with
+    the distribution itself instead of with a hand-run command. A node is an appliance on a
+    network: with no firewall it answered on rpcbind 111, CoreDNS *:8080/*:8181 and etcd's client
+    port on the LAN address (measured 2026-11-20), and none of that is anything an administrator
+    asked for - it is what the components do by default.
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 22:45:00 +0530
+
+kubeos-base (0.2.0-13) trixie; urgency=medium
+
+  * Make [Manager] settings actually apply on upgrade. system.conf.d is read by PID 1, so
+    `daemon-reload` does not pick it up: after upgrading to 0.2.0-12 the watchdog stayed at
+    RuntimeWatchdogUSec=0 on the live node until `systemctl daemon-reexec` was run by hand
+    (measured 2026-11-20). postinst now re-execs systemd, which is the mechanism systemd uses
+    for its own upgrades - so a node that upgrades gets the watchdog without a reboot.
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 20:50:00 +0530
+
+kubeos-base (0.2.0-12) trixie; urgency=medium
+
+  * Enable the watchdog: /etc/systemd/system.conf.d/99-kubeos-watchdog.conf sets
+    RuntimeWatchdogSec=30s and RebootWatchdogSec=10min. With the default of 0 nothing pets
+    /dev/watchdog, so a hung kernel or a starved PID 1 leaves the machine dead until somebody
+    power-cycles it - not what an appliance should do. 30s is a fast recovery and still longer
+    than any normal stall; RebootWatchdogSec turns a shutdown that hangs half way into a hard
+    reset instead of a machine that never comes back. Harmless where no watchdog device exists
+    (systemd reports that it found none and continues).
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 20:30:00 +0530
+
+kubeos-base (0.2.0-11) trixie; urgency=medium
+
+  * Fix a silent no-op in 0.2.0-10: the security origin used ${distro_codename}, which comes
+    from /etc/os-release where KubeOS's codename is "orhan" - so the pattern expanded to
+    "orhan-security", matched no suite at all, and unattended-upgrade answered "No packages
+    found that can be upgraded unattended". Automatic security updates would simply never have
+    run, with nothing failing to show for it. The suite is now written out as trixie-security,
+    and the dry run on a live node confirms the origin is matched.
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 20:20:00 +0530
+
+kubeos-base (0.2.0-10) trixie; urgency=medium
+
+  * Apply Debian SECURITY updates automatically, and nothing else. A node is an appliance:
+    nothing logs in to run apt, and a fresh install already showed 17 upgradable packages.
+    Two files in /etc/apt/apt.conf.d: 21kubeos-auto-upgrades.conf (daily index + daily
+    unattended run) and 52kubeos-unattended-upgrades.conf, which clears Debian's default
+    origin list - it starts with "origin=Debian,codename=${distro_codename},label=Debian",
+    i.e. the WHOLE trixie suite, so the stock policy would upgrade everything by itself - and
+    allows only trixie-security. KubeOS and the Kubernetes stack are blacklisted by anchored
+    regex (kubeos-*, kubelet, kubeadm, kubectl, kubernetes-cni, cri-tools, containerd.io,
+    docker-*, helm), no automatic reboot, and nothing is ever removed automatically.
+    The #clear form was verified against apt's own parser on a live node: the more obvious
+    "#clear;" inside the list is rejected with "clear directive requires an option tree".
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 20:10:00 +0530
+
+kubeos-base (0.2.0-9) trixie; urgency=medium
+
+  * Package the enablement properly: the .wants link and the drop-in now use the canonical
+    smartmontools.service (smartd is an alias symlink, which lintian rejected as
+    "service-file-is-not-a-file"), the stale smartd.service link is gone from the payload, and
+    the tag gets a documented override because its target belongs to the smartmontools package
+    and is therefore invisible to lintian. Enabling through a shipped link is deliberate: a
+    postinst `enable` would run in a live-build chroot with no systemd, so every fresh install
+    would boot with disk-health monitoring off.
+  * 0.2.0-8's drop-in is confirmed live on a node: `systemctl cat smartmontools` shows the
+    vendor ExecStart replaced by /usr/sbin/smartd -n -c /etc/kubeos/smartd.conf, is-enabled
+    answers "enabled", the config parses, and in a VM the unit is skipped (ConditionResult=no,
+    Result=success) instead of failing.
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 20:00:00 +0530
+
+kubeos-base (0.2.0-8) trixie; urgency=medium
+
+  * Fix the two things 0.2.0-7 got wrong, both caught on the live node before anyone else saw
+    them: (1) the .wants link pointed at smartd.service, which is only an ALIAS symlink to
+    smartmontools.service, so lintian failed the package with "service-file-is-not-a-file" and
+    systemd was left with an ambiguous name - the link and the drop-in now use the canonical
+    smartmontools.service; (2) the package shipped a drop-in but had no postinst, so nothing
+    ran `systemctl daemon-reload` and `systemctl cat smartd` still showed the vendor ExecStart
+    after the upgrade. postinst now reloads and starts the unit (a VM stays skipped by
+    Debian's ConditionVirtualization=no, which is correct and not a failure).
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 19:50:00 +0530
+
+kubeos-base (0.2.0-7) trixie; urgency=medium
+
+  * Watch disk health: smartd is now enabled, with /etc/kubeos/smartd.conf
+    (DEVICESCAN -H -f -t -n standby,q) and alerts that go to the journal instead of mail.
+    smartmontools was installed on every node but its daemon never ran, so a disk could start
+    failing its own SMART health check while the system reported nothing - the dashboard's
+    Disks page shows usage, not health. Debian's own /etc/smartd.conf is left untouched (it
+    belongs to smartmontools) and is replaced through a unit drop-in, because the default
+    there mails root and a KubeOS node has no MTA, which would have lost the alert silently.
+    Note: smartd.service carries ConditionVirtualization=no, so it is correctly inactive in
+    a VM - this takes effect on physical hardware.
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 19:40:00 +0530
+
+kubeos-base (0.2.0-6) trixie; urgency=medium
+
+  * Cap crash dumps: /etc/systemd/coredump.conf.d/99-kubeos.conf sets MaxUse=200M,
+    KeepFree=1G and ExternalSizeMax=512M. systemd's own defaults are 32 GB for a single dump
+    and NO total limit, on a root filesystem of about 10 GB - so a crash-looping 300 MB
+    process could fill / and take kubelet, etcd and the dashboard down, an outage caused by a
+    diagnostic nobody was reading. The newest dumps (the ones `coredumpctl` is used for)
+    survive; the oldest are dropped to stay inside the cap.
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 19:25:00 +0530
+
+kubeos-base (0.2.0-5) trixie; urgency=medium
+
+  * Ship /etc/apt/sources.list.d/debian.list - the base Debian suite was MISSING on every
+    installed node. The installer's "deb cdrom:" line is disabled by preseed and nothing
+    replaced it, and the ISO's other archive lists only cover security, updates and
+    backports, so a package could be installed only if Debian had published a security
+    update for it: on a freshly installed node `apt install htop` answered "has no
+    installation candidate", as did strace, net-tools and systemd-coredump, while vim-nox
+    and nfs-common installed purely because they had a DSA (measured 2026-11-20). It ships
+    in this package rather than as an ISO archive list so that already-installed nodes are
+    repaired by `apt update && apt upgrade`.
+
+ -- KubeOS <mail@kubeos.in>  Fri, 20 Nov 2026 19:20:00 +0530
+
 kubeos-base (0.2.0-4) trixie; urgency=medium
 
   * Depend on kubeos-containerd, which now owns /etc/containerd/config.toml (hook 9060 is gone).

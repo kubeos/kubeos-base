@@ -9,7 +9,7 @@ Homepage: https://kubeos.in/
 
 Package: kubeos-base
 Architecture: all
-Depends: ${misc:Depends}, kubeos-branding, kubeos-cli, kubeos-pause-image, kubeos-metrics-server, kubeos-network, kubeos-storage, kubeos-control-plane, kubeos-dashboard, kubeos-kubernetes, kubeos-containerd
+Depends: ${misc:Depends}, kubeos-branding, kubeos-cli, kubeos-pause-image, kubeos-metrics-server, kubeos-network, kubeos-storage, kubeos-control-plane, kubeos-dashboard, kubeos-kubernetes, kubeos-containerd, kubeos-firewall
 Description: KubeOS: the container platform on top of Debian
  Installs a complete KubeOS node and, through its version, answers the question a Debian
  system cannot answer on its own: which KubeOS is this? The individual components carry

@@ -1,0 +1,13 @@
+# KubeOS: the base Debian suite, and the reason it is shipped here.
+#
+# The installer brings its own "deb cdrom:" line for the installation medium and preseed
+# disables it afterwards (see /etc/apt/sources.list), while nothing replaces it with a
+# network source. The ISO's other archive lists only cover security, updates and backports,
+# so an installed node could install a package ONLY if Debian had published a security
+# update for it: `apt install htop` answered "Package 'htop' has no installation candidate"
+# on a freshly installed node, and so did strace, net-tools and systemd-coredump, while
+# vim-nox and nfs-common worked purely because they had a DSA (measured 2026-11-20).
+#
+# It lives in kubeos-base rather than in an ISO archive list so that nodes ALREADY installed
+# are repaired by `apt update && apt upgrade`, not only the next ISO.
+deb https://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware

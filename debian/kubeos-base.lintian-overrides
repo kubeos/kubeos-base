@@ -9,3 +9,12 @@ kubeos-base: file-in-etc-not-marked-as-conffile
 # from repo.kubeos.in and nothing else. Debian's tag assumes a distribution repository set up by
 # the installer; KubeOS ships its own archive line so that `apt upgrade` works on a fresh install.
 kubeos-base: package-installs-apt-sources
+
+# usr/lib/systemd/system/multi-user.target.wants/smartmontools.service -> ../smartmontools.service
+# The unit belongs to the smartmontools package, so the target is simply NOT in this package's
+# payload and lintian reports "service-file-is-not-a-file" for a link that is perfectly valid on
+# a real system (measured 2026-11-20: `systemctl is-enabled smartmontools` answers "enabled" and
+# the drop-in is picked up). A shipped .wants link is the only way to enable another package's
+# unit at BUILD time - a postinst `enable` runs in a live-build chroot where systemd is not
+# running, so every freshly installed node would come up with disk-health monitoring off.
+kubeos-base: service-file-is-not-a-file

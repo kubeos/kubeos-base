@@ -1,0 +1,32 @@
+#!/bin/sh
+# KubeOS base, postinst: make a newly installed systemd drop-in take effect on a live node.
+#
+# WHY   1.0.0 style packages call `systemctl daemon-reload` through debhelper only for units
+#       they ship themselves. This package ships DROP-INS and a .wants link for a unit owned by
+#       smartmontools, so without an explicit reload systemd kept running smartd with the
+#       previous ExecStart until the next reboot (measured 2026-11-20: `systemctl cat smartd`
+#       still showed the vendor command line right after the upgrade).
+# SAFE  Re-runnable, never fatal: a node without systemd running (a chroot during a live-build)
+#       is skipped, and a failure to start is ignored because Debian's own
+#       ConditionVirtualization=no makes the unit a no-op inside a VM - which is correct.
+set -e
+
+# debhelper inserts its generated snippets here; it must sit before this script's own exits.
+#DEBHELPER#
+
+case "${1:-}" in
+    configure) : ;;
+    *) exit 0 ;;
+esac
+
+if [ -d /run/systemd/system ]; then
+    systemctl daemon-reload >/dev/null 2>&1 || true
+    # [Manager] settings in /etc/systemd/system.conf.d are read by PID 1 itself, so a reload
+    # does NOT apply them: without a re-exec the node keeps the old values until the next boot,
+    # which is a setting that is on disk and not in effect (measured 2026-11-20 - the watchdog
+    # stayed RuntimeWatchdogUSec=0 after the upgrade until `systemctl daemon-reexec` was run by
+    # hand). systemd itself re-execs on its own upgrades, so this is the normal mechanism.
+    systemctl daemon-reexec >/dev/null 2>&1 || true
+    systemctl start smartmontools.service >/dev/null 2>&1 || true
+fi
+exit 0

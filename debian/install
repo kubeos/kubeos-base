@@ -1,2 +1,9 @@
 payload/etc/apt/keyrings/kubeos-archive-keyring.asc   etc/apt/keyrings/
 payload/etc/apt/sources.list.d/kubeos.list            etc/apt/sources.list.d/
+payload/etc/apt/sources.list.d/debian.list            etc/apt/sources.list.d/
+payload/etc/systemd/coredump.conf.d/99-kubeos.conf      etc/systemd/coredump.conf.d/
+payload/etc/systemd/system.conf.d/*.conf              etc/systemd/system.conf.d/
+payload/etc/kubeos/smartd.conf                          etc/kubeos/
+payload/etc/apt/apt.conf.d/*.conf                       etc/apt/apt.conf.d/
+payload/etc/systemd/system/smartmontools.service.d/*.conf etc/systemd/system/smartmontools.service.d/
+payload/usr/lib/systemd/system/multi-user.target.wants/* usr/lib/systemd/system/multi-user.target.wants/
